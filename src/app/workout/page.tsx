@@ -18,6 +18,12 @@ interface WorkoutRowData {
   variations: Variation[];
 }
 
+function toTitleCase(str: string) {
+  return str.replace(/\w\S*/g, (txt) =>
+    txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+  );
+}
+
 export default function Workout() {
   const [rows, setRows] = useState<WorkoutRowData[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -71,8 +77,8 @@ export default function Workout() {
         <div className="flex flex-col gap-6 w-full mb-8">
           {rows.map((row, i) => (
             <div key={i} className="flex flex-row items-center gap-4">
-              <div className="bg-[#36c3e6] rounded px-4 py-3 font-bold text-2xl flex-1 text-black max-w-[40%] text-center">
-                {row.lift || '{workoutName}'}
+              <div className="bg-[#36c3e6] rounded px-4 py-3 font-bold text-xl flex-1 text-black max-w-[40%] text-center">
+                {row.lift ? toTitleCase(row.lift) : '{workoutName}'}
               </div>
               <WorkoutRow index={i} variations={row.variations} onAddVariation={() => handleAddVariationClick(i)} />
             </div>
