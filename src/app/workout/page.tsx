@@ -5,30 +5,36 @@ import Timer from "./Timer";
 import WorkoutRow from "./WorkoutRow";
 import WorkoutRowFormModal from "./WorkoutRowFormModal";
 
-// Define a type for the row data
-interface WorkoutRowData {
+interface Variation {
   sets?: string;
   reps?: string;
   lbs?: string;
   dropSet?: boolean;
   toFailure?: boolean;
-  lift?: string;
-  weight?: string;
 }
 
-const INITIAL_ROWS: WorkoutRowData[] = [
-  {},
-  {},
-  {},
-];
+interface WorkoutRowData {
+  lift?: string;
+  variations: Variation[];
+}
 
 export default function Workout() {
-  const [rows, setRows] = useState<WorkoutRowData[]>(INITIAL_ROWS);
+  const [rows, setRows] = useState<WorkoutRowData[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'row' | 'variation'>("row");
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
-  const handlePlusClick = (i: number) => {
-    setEditingIndex(i);
+  // Open modal to add a new row
+  const handleAddRowClick = () => {
+    setModalMode("row");
+    setEditingIndex(null);
+    setModalOpen(true);
+  };
+
+  // Open modal to add a variation to an existing row
+  const handleAddVariationClick = (rowIdx: number) => {
+    setModalMode("variation");
+    setEditingIndex(rowIdx);
     setModalOpen(true);
   };
 
@@ -38,7 +44,17 @@ export default function Workout() {
   };
 
   const handleModalSubmit = (values: any) => {
-    setRows(prev => prev.map((row, idx) => idx === editingIndex ? values : row));
+    const { weight, lift, ...rest } = values;
+    const variation = { ...rest, lbs: weight };
+    if (modalMode === "row") {
+      setRows(prev => [...prev, { lift, variations: [variation] }]);
+    } else if (modalMode === "variation" && editingIndex !== null) {
+      setRows(prev => prev.map((row, idx) =>
+        idx === editingIndex
+          ? { ...row, variations: [...row.variations, variation] }
+          : row
+      ));
+    }
     setModalOpen(false);
     setEditingIndex(null);
   };
@@ -58,19 +74,17 @@ export default function Workout() {
               <div className="bg-[#36c3e6] rounded px-4 py-3 font-bold text-2xl flex-1 text-black max-w-[40%] text-center">
                 {row.lift || '{workoutName}'}
               </div>
-              <div onClick={() => !row.sets && handlePlusClick(i)} style={{ cursor: !row.sets ? 'pointer' : 'default' }}>
-                <WorkoutRow index={i} {...row} />
-              </div>
+              <WorkoutRow index={i} variations={row.variations} onAddVariation={() => handleAddVariationClick(i)} />
             </div>
           ))}
         </div>
         {/* Add Row Button */}
-        <button className="bg-[#36c3e6] text-black font-bold rounded w-full py-4 text-xl flex items-center justify-center max-h-[10px]">
+        <button className="bg-[#36c3e6] text-black font-bold rounded w-full py-4 text-xl flex items-center justify-center max-h-[10px]" onClick={handleAddRowClick}>
           +
         </button>
         <WorkoutRowFormModal
           open={modalOpen}
-          initialValues={editingIndex !== null ? rows[editingIndex] : {}}
+          initialValues={{}}
           onClose={handleModalClose}
           onSubmit={handleModalSubmit}
         />

@@ -1,7 +1,6 @@
 import React from "react";
 
-interface WorkoutRowProps {
-  index: number;
+interface Variation {
   sets?: string;
   reps?: string;
   lbs?: string;
@@ -9,32 +8,25 @@ interface WorkoutRowProps {
   toFailure?: boolean;
 }
 
-export default function WorkoutRow({ index, sets, reps, lbs, dropSet, toFailure }: WorkoutRowProps) {
-  // Check if any required props are missing
-  const hasAllProps = sets !== undefined && reps !== undefined && lbs !== undefined && 
-                     dropSet !== undefined && toFailure !== undefined;
+interface WorkoutRowProps {
+  index: number;
+  variations: Variation[];
+  onAddVariation: () => void;
+}
 
+export default function WorkoutRow({ index, variations, onAddVariation }: WorkoutRowProps) {
   return (
     <div className="flex flex-row gap-2 items-center">
-      {!hasAllProps ? (
-        <span className="bg-[#bde8f7] text-[#0082c8] font-bold rounded-full w-12 h-12 flex items-center justify-center text-2xl ml-2 cursor-pointer">+</span>
+      {variations.length === 0 ? (
+        <span className="bg-[#bde8f7] text-[#0082c8] font-bold rounded-full w-12 h-12 flex items-center justify-center text-2xl ml-2 cursor-pointer" onClick={onAddVariation}>+</span>
       ) : (
         <>
-          {index === 2 ? (
-            <span className="bg-[#e74c3c] text-white font-bold rounded-full w-16 h-16 flex flex-col items-center justify-center text-sm">
-              {reps}<br />{lbs}
+          {variations.map((v, idx) => (
+            <span key={idx} className="bg-[#0099c8] text-white font-bold rounded-full w-16 h-16 flex flex-col items-center justify-center text-sm">
+              {v.sets}<br />{v.reps}<br />{v.lbs}
             </span>
-          ) : (
-            [1, 2, 3].map((b) => (
-              <span key={b} className="bg-[#0099c8] text-white font-bold rounded-full w-16 h-16 flex flex-col items-center justify-center text-sm">
-                {sets}<br />{reps}<br />{lbs}
-              </span>
-            ))
-          )}
-          <span className="bg-[#bde8f7] text-[#0082c8] font-bold rounded-full w-12 h-12 flex items-center justify-center text-2xl ml-2 cursor-pointer">+</span>
-          {index === 2 && (
-            <span className="text-3xl mx-2">→</span>
-          )}
+          ))}
+          <span className="bg-[#bde8f7] text-[#0082c8] font-bold rounded-full w-12 h-12 flex items-center justify-center text-2xl ml-2 cursor-pointer" onClick={onAddVariation}>+</span>
         </>
       )}
     </div>
