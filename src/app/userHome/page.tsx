@@ -8,49 +8,52 @@ const monthNames = [
 ];
 
 function getCalendarRows(month: number, year: number) {
-  const firstDay = new Date(year, month, 1).getDay();
+  const firstDay = new Date(year, month, 1).getDay(); // 0 (Sun) - 6 (Sat)
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const rows = [];
-  let current = 1 - firstDay;
+  let day = 1;
   for (let i = 0; i < 6; i++) {
     const row = [];
     for (let j = 0; j < 7; j++) {
-      row.push(current > 0 && current <= daysInMonth ? current : null);
-      current++;
+      if ((i === 0 && j < firstDay) || day > daysInMonth) {
+        row.push(null);
+      } else {
+        row.push(day++);
+      }
     }
     rows.push(row);
-    if (current > daysInMonth) break;
   }
   return rows;
 }
 
 export default function UserHome() {
   const today = new Date();
-  const [month, setMonth] = useState(today.getMonth());
-  const [year, setYear] = useState(today.getFullYear());
-  const calendarRows = getCalendarRows(month, year);
+  const [date, setDate] = useState({ month: today.getMonth(), year: today.getFullYear() });
+  const calendarRows = getCalendarRows(date.month, date.year);
 
   // Extract month name, day, and year from today
   const monthName = today.toLocaleString('default', { month: 'long' });
   const day = today.getDate();
   const fullYear = today.getFullYear();
 
-  const handlePrevYear = () => setYear(y => y - 1);
-  const handleNextYear = () => setYear(y => y + 1);
-  const handlePrevMonth = () => setMonth(m => {
-    if (m === 0) {
-      setYear(y => y - 1);
-      return 11;
-    }
-    return m - 1;
-  });
-  const handleNextMonth = () => setMonth(m => {
-    if (m === 11) {
-      setYear(y => y + 1);
-      return 0;
-    }
-    return m + 1;
-  });
+  const handlePrevYear = () => setDate(d => ({ ...d, year: d.year - 1 }));
+  const handleNextYear = () => setDate(d => ({ ...d, year: d.year + 1 }));
+  const handlePrevMonth = () => {
+    setDate(({ month, year }) => {
+      if (month === 0) {
+        return { month: 11, year: year - 1 };
+      }
+      return { month: month - 1, year };
+    });
+  };
+  const handleNextMonth = () => {
+    setDate(({ month, year }) => {
+      if (month === 11) {
+        return { month: 0, year: year + 1 };
+      }
+      return { month: month + 1, year };
+    });
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white">
@@ -67,9 +70,15 @@ export default function UserHome() {
         <div className="flex flex-row justify-between w-full mb-2 items-center">
           <button className="text-lg font-bold text-[#0082c8]" onClick={handlePrevYear}>{'<<'}</button>
           <button className="text-lg font-bold text-[#0082c8]" onClick={handlePrevMonth}>{'<'}</button>
-          <span className="font-bold">{`${monthNames[month]} ${year}`}</span>
+          <span className="font-bold">{`${monthNames[date.month]} ${date.year}`}</span>
           <button className="text-lg font-bold text-[#0082c8]" onClick={handleNextMonth}>{'>'}</button>
           <button className="text-lg font-bold text-[#0082c8]" onClick={handleNextYear}>{'>>'}</button>
+        </div>
+        {/* Weekday headers */}
+        <div className="grid grid-cols-7 gap-2 mb-1">
+          {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d => (
+            <span key={d} className="text-xs font-bold text-[#0082c8] text-center">{d}</span>
+          ))}
         </div>
         <div className="grid grid-cols-7 gap-2">
           {calendarRows.map((row, i) => (
@@ -80,7 +89,7 @@ export default function UserHome() {
                     key={j}
                     className={`w-7 h-7 flex items-center justify-center rounded-full text-sm font-bold
                       ${'bg-[#bde8f7] text-[#0082c8]'}
-                      ${d === today.getDate() && month === today.getMonth() && year === today.getFullYear() ? 'border border-black' : ''}
+                      ${d === today.getDate() && date.month === today.getMonth() && date.year === today.getFullYear() ? 'border border-black' : ''}
                     `}
                   >
                     {d}
