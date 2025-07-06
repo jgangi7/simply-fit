@@ -82,7 +82,7 @@ export default function WorkoutRowFormModal({ open, initialValues, onClose, onSu
               <input className="w-32 text-black bg-white" value={dropsetWeight} onChange={e => setDropsetWeight(e.target.value)} />
             </div>
             <div className="flex flex-row items-center mb-2">
-              <label className="flex-1 text-white">Dropset Repetitions</label>
+              <label className="flex-1 text-white mx-1">Dropset Repetitions</label>
               <input className="w-32 text-black bg-white" value={dropsetReps} onChange={e => setDropsetReps(e.target.value)} />
             </div>
           </>
