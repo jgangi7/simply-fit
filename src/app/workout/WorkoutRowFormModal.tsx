@@ -57,14 +57,18 @@ export default function WorkoutRowFormModal({ open, initialValues, onClose, onSu
           <label className="flex-1 text-white">Weight</label>
           <input className="w-32 text-black bg-white" value={weight} onChange={e => setWeight(e.target.value)} />
         </div>
-        <div className="flex flex-row items-center mb-2">
-          <label className="flex-1 text-white">Sets</label>
-          <input className="w-32 text-black bg-white" value={sets} onChange={e => setSets(e.target.value)} />
-        </div>
-        <div className="flex flex-row items-center mb-2">
-          <label className="flex-1 text-white">Repetitions</label>
-          <input className="w-32 text-black bg-white" value={reps} onChange={e => setReps(e.target.value)} />
-        </div>
+        {!toFailure && (
+          <div className="flex flex-row items-center mb-2">
+            <label className="flex-1 text-white">Sets</label>
+            <input className="w-32 text-black bg-white" value={sets} onChange={e => setSets(e.target.value)} />
+          </div>
+        )}
+        {!toFailure && (
+          <div className="flex flex-row items-center mb-2">
+            <label className="flex-1 text-white">Repetitions</label>
+            <input className="w-32 text-black bg-white" value={reps} onChange={e => setReps(e.target.value)} />
+          </div>
+        )}
         <button
           className="bg-[#7ca16b] text-black font-bold rounded w-32 py-2 mt-4 self-end"
           onClick={() => onSubmit({ toFailure, dropSet, lift, weight, sets, reps })}
