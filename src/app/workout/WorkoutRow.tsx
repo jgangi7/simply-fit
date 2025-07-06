@@ -10,7 +10,7 @@ interface Variation {
 
 interface WorkoutRowProps {
   variations: Variation[];
-  onAddVariation: () => void;
+  onAddVariation?: () => void;
 }
 
 export default function WorkoutRow({ variations, onAddVariation }: WorkoutRowProps) {
@@ -23,7 +23,9 @@ export default function WorkoutRow({ variations, onAddVariation }: WorkoutRowPro
               {v.lbs}<br />  {v.sets} x {v.reps}
             </span> 
           ))}
-          <span className="bg-[#bde8f7] text-[#0082c8] font-bold rounded-full w-12 h-12 flex items-center justify-center text-2xl ml-2 cursor-pointer" onClick={onAddVariation}>+</span>
+          {onAddVariation && (
+            <span className="bg-[#bde8f7] text-[#0082c8] font-bold rounded-full w-12 h-12 flex items-center justify-center text-2xl ml-2 cursor-pointer" onClick={onAddVariation}>+</span>
+          )}
         </>
       )}
     </div>

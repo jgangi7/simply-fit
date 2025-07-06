@@ -1,9 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
 
-export default function Timer() {
+export default function Timer({ running }: { running: boolean }) {
   const [seconds, setSeconds] = useState(0);
-  const [running, setRunning] = useState(true);
 
   useEffect(() => {
     if (!running) return;
@@ -22,13 +21,7 @@ export default function Timer() {
   return (
     <div className="relative w-full flex flex-row items-center justify-between mb-8">
       <span className="text-xl font-bold">{formatTime(seconds)}</span>
-      <button
-        className="fixed bottom-6 right-6 bg-[#e74c3c] text-white font-bold px-8 py-4 rounded-lg shadow-lg text-lg hover:bg-[#c0392b] transition-colors z-50"
-        onClick={() => setRunning(false)}
-        disabled={!running}
-      >
-        Finish
-      </button>
+      
     </div>
   );
 } 
