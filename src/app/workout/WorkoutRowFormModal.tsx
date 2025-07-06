@@ -9,6 +9,8 @@ interface WorkoutRowFormModalProps {
     weight?: string;
     sets?: string;
     reps?: string;
+    dropsetWeight?: string;
+    dropsetReps?: string;
   };
   onClose: () => void;
   onSubmit: (values: {
@@ -18,6 +20,8 @@ interface WorkoutRowFormModalProps {
     weight: string;
     sets: string;
     reps: string;
+    dropsetWeight?: string;
+    dropsetReps?: string;
   }) => void;
 }
 
@@ -28,6 +32,8 @@ export default function WorkoutRowFormModal({ open, initialValues, onClose, onSu
   const [weight, setWeight] = useState(initialValues?.weight || "");
   const [sets, setSets] = useState(initialValues?.sets || "");
   const [reps, setReps] = useState(initialValues?.reps || "");
+  const [dropsetWeight, setDropsetWeight] = useState(initialValues?.dropsetWeight || "");
+  const [dropsetReps, setDropsetReps] = useState(initialValues?.dropsetReps || "");
 
   if (!open) return null;
 
@@ -69,9 +75,21 @@ export default function WorkoutRowFormModal({ open, initialValues, onClose, onSu
             <input className="w-32 text-black bg-white" value={reps} onChange={e => setReps(e.target.value)} />
           </div>
         )}
+        {dropSet && (
+          <>
+            <div className="flex flex-row items-center mb-2">
+              <label className="flex-1 text-white">Dropset Weight</label>
+              <input className="w-32 text-black bg-white" value={dropsetWeight} onChange={e => setDropsetWeight(e.target.value)} />
+            </div>
+            <div className="flex flex-row items-center mb-2">
+              <label className="flex-1 text-white">Dropset Repetitions</label>
+              <input className="w-32 text-black bg-white" value={dropsetReps} onChange={e => setDropsetReps(e.target.value)} />
+            </div>
+          </>
+        )}
         <button
           className="bg-[#7ca16b] text-black font-bold rounded w-32 py-2 mt-4 self-end"
-          onClick={() => onSubmit({ toFailure, dropSet, lift, weight, sets, reps })}
+          onClick={() => onSubmit({ toFailure, dropSet, lift, weight, sets, reps, dropsetWeight, dropsetReps })}
         >
           Begin
         </button>
