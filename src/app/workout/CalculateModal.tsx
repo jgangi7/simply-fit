@@ -5,8 +5,18 @@ export default function CalculateModal({ open, onClose }: { open: boolean; onClo
   const [weight, setWeight] = useState("");
   const [reps, setReps] = useState("");
   const [bodyWeight, setBodyWeight] = useState("");
+  const [results, setResults] = useState<{ oneRepMax: number } | null>(null);
 
   if (!open) return null;
+
+  function calculate() {
+    const weightValue = parseFloat(weight);
+    const repsValue = parseInt(reps);
+    const oneRepMax = weightValue * (1 + repsValue / 30);
+    setResults({
+      oneRepMax
+    });
+  }
 
   return (
     <div className="fixed inset-0 backdrop-blur-sm bg-black/10 flex items-center justify-center z-50">
@@ -50,10 +60,20 @@ export default function CalculateModal({ open, onClose }: { open: boolean; onClo
             type="button"
             className="w-full mt-4 bg-[#0077b6] text-black font-semibold rounded shadow py-2 text-center text-base"
             style={{ boxShadow: "0 2px 4px rgba(0,0,0,0.15)" }}
+            onClick={calculate}
           >
             Calculate
           </button>
         </form>
+        
+        {results && (
+          <div className="w-full mt-6 p-4 bg-gray-100 rounded-lg">
+            <div className="text-center text-lg font-semibold mb-2">Results</div>
+            <div className="text-center text-sm text-gray-700">
+              <div className="mb-1">One Rep Max: <span className="font-bold">{results.oneRepMax.toFixed(1)} lbs</span></div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
