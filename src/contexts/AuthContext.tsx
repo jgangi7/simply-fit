@@ -18,6 +18,7 @@ interface AuthContextType {
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   updateMaxLifts: (maxLifts: { bench: number; squat: number; deadlift: number }) => void;
+  updateMaxLift: (liftType: 'bench' | 'squat' | 'deadlift', weight: number) => void;
   isLoading: boolean;
 }
 
@@ -84,8 +85,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateMaxLift = (liftType: 'bench' | 'squat' | 'deadlift', weight: number) => {
+    if (user && weight > (user.maxLifts[liftType] || 0)) {
+      const updatedUser = {
+        ...user,
+        maxLifts: {
+          ...user.maxLifts,
+          [liftType]: weight
+        }
+      };
+      setUser(updatedUser);
+      localStorage.setItem('simply-fit-user', JSON.stringify(updatedUser));
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateMaxLifts, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, updateMaxLifts, updateMaxLift, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

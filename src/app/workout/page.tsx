@@ -7,6 +7,7 @@ import Timer from "./Timer";
 import WorkoutRow from "./WorkoutRow";
 import WorkoutRowFormModal from "./WorkoutRowFormModal";
 import CalculateModal from "./CalculateModal";
+import Toast from "../../components/Toast";
 
 interface Variation {
   sets?: string;
@@ -28,7 +29,7 @@ function toTitleCase(str: string) {
 }
 
 export default function Workout() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, updateMaxLift } = useAuth();
   const router = useRouter();
   const [rows, setRows] = useState<WorkoutRowData[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -36,6 +37,8 @@ export default function Workout() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [calculateModalOpen, setCalculateModalOpen] = useState(false);
   const [running, setRunning] = useState(true);
+  const [toastMessage, setToastMessage] = useState("");
+  const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -74,9 +77,44 @@ export default function Workout() {
     setEditingIndex(null);
   };
 
+  const checkAndUpdateMaxLift = (liftName: string, weight: number) => {
+    const liftLower = liftName.toLowerCase();
+    
+    // Check if it's a bench, squat, or deadlift exercise
+    if (liftLower.includes('bench') || liftLower.includes('press')) {
+      const currentMax = user?.maxLifts?.bench || 0;
+      if (weight > currentMax) {
+        updateMaxLift('bench', weight);
+        setToastMessage(`New bench press max: ${weight} lbs! 🎉`);
+        setShowToast(true);
+      }
+    } else if (liftLower.includes('squat')) {
+      const currentMax = user?.maxLifts?.squat || 0;
+      if (weight > currentMax) {
+        updateMaxLift('squat', weight);
+        setToastMessage(`New squat max: ${weight} lbs! 🎉`);
+        setShowToast(true);
+      }
+    } else if (liftLower.includes('deadlift') || liftLower.includes('dead')) {
+      const currentMax = user?.maxLifts?.deadlift || 0;
+      if (weight > currentMax) {
+        updateMaxLift('deadlift', weight);
+        setToastMessage(`New deadlift max: ${weight} lbs! 🎉`);
+        setShowToast(true);
+      }
+    }
+  };
+
   const handleModalSubmit = (values: any) => {
     const { weight, lift, ...rest } = values;
     const variation = { ...rest, lbs: weight };
+    
+    // Check if this exercise should update max lifts
+    const weightNum = parseFloat(weight);
+    if (!isNaN(weightNum) && weightNum > 0) {
+      checkAndUpdateMaxLift(lift, weightNum);
+    }
+    
     if (modalMode === "row") {
       setRows(prev => [...prev, { lift, variations: [variation] }]);
     } else if (modalMode === "variation" && editingIndex !== null) {
@@ -134,6 +172,12 @@ export default function Workout() {
           onSubmit={handleModalSubmit}
         />
         <CalculateModal open={calculateModalOpen} onClose={() => setCalculateModalOpen(false)} />
+        <Toast 
+          message={toastMessage}
+          isVisible={showToast}
+          onClose={() => setShowToast(false)}
+          type="success"
+        />
       </div>
     </div>
   );
