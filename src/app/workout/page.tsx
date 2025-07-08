@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../../contexts/AuthContext";
 import Timer from "./Timer";
 import WorkoutRow from "./WorkoutRow";
 import WorkoutRowFormModal from "./WorkoutRowFormModal";
@@ -27,13 +28,32 @@ function toTitleCase(str: string) {
 }
 
 export default function Workout() {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
   const [rows, setRows] = useState<WorkoutRowData[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'row' | 'variation'>("row");
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [calculateModalOpen, setCalculateModalOpen] = useState(false);
   const [running, setRunning] = useState(true);
-  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push("/");
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white">
+        <div className="text-[#0082c8] text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   // Open modal to add a new row
   const handleAddRowClick = () => {

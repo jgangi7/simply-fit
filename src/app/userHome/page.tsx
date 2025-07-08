@@ -1,6 +1,8 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useAuth } from "../../contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 const monthNames = [
   "January", "February", "March", "April", "May", "June",
@@ -27,9 +29,31 @@ function getCalendarRows(month: number, year: number) {
 }
 
 export default function UserHome() {
+  const { user, logout, isLoading } = useAuth();
+  const router = useRouter();
   const today = new Date();
   const [date, setDate] = useState({ month: today.getMonth(), year: today.getFullYear() });
   const calendarRows = getCalendarRows(date.month, date.year);
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push("/");
+    }
+  }, [user, isLoading, router]);
+
+  const totalLifts = (user?.maxLifts?.bench || 0) + (user?.maxLifts?.squat || 0) + (user?.maxLifts?.deadlift || 0);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white">
+        <div className="text-[#0082c8] text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   // Extract month name, day, and year from today
   const monthName = today.toLocaleString('default', { month: 'long' });
@@ -57,13 +81,47 @@ export default function UserHome() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white">
+      <div className="absolute top-4 right-4">
+        <button
+          onClick={() => {
+            logout();
+            router.push("/");
+          }}
+          className="text-sm text-gray-600 hover:text-gray-800"
+        >
+          Sign Out
+        </button>
+      </div>
       <h1 className="text-2xl sm:text-3xl font-bold text-[#0082c8] mt-8 mb-8 text-center">
-        Welcome {'{username}'}
+        Welcome {user.name || user.email}
       </h1>
+      <div className="flex flex-row justify-center gap-8 mb-4">
+        <div className="text-center">
+          <div className="text-sm text-gray-600">Squat</div>
+          <div className="font-bold text-xl text-[#0082c8]">
+            {user.maxLifts?.squat > 0 ? `${user.maxLifts.squat} lbs` : "Not set"}
+          </div>
+        </div>
+        <div className="text-center">
+          <div className="text-sm text-gray-600">Bench</div>
+          <div className="font-bold text-xl text-[#0082c8]">
+            {user.maxLifts?.bench > 0 ? `${user.maxLifts.bench} lbs` : "Not set"}
+          </div>
+        </div>
+        <div className="text-center">
+          <div className="text-sm text-gray-600">Deadlift</div>
+          <div className="font-bold text-xl text-[#0082c8]">
+            {user.maxLifts?.deadlift > 0 ? `${user.maxLifts.deadlift} lbs` : "Not set"}
+          </div>
+        </div>
+      </div>
       <div className="flex flex-row justify-center gap-8 mb-10">
-        <span className="font-bold text-xl">{'{squat}'}</span>
-        <span className="font-bold text-xl">{'{bench}'}</span>
-        <span className="font-bold text-xl">{'{dead}'}</span>
+        <div className="text-center">
+          <div className="text-sm text-gray-600">Total</div>
+          <div className="font-bold text-xl text-[#0082c8]">
+            {`${totalLifts} lbs`}
+          </div>
+        </div>
       </div>
       <h2 className="text-xl font-bold text-[#0082c8] mb-4">Today is {`${monthName} ${day}, ${fullYear}`}</h2>
       <div className="bg-[#d4f4fc] rounded p-4 mb-8 flex flex-col items-center w-[260px]">
@@ -102,9 +160,14 @@ export default function UserHome() {
           ))}
         </div>
       </div>
-      <Link href="/workout" className="bg-[#d4f4fc] text-[#0082c8] font-bold rounded px-12 py-2 mt-2 shadow hover:bg-[#bde8f7] transition-colors text-center">
-        Start
-      </Link>
+      <div className="flex flex-col gap-4 mt-4">
+        <Link href="/workout" className="bg-[#d4f4fc] text-[#0082c8] font-bold rounded px-12 py-2 shadow hover:bg-[#bde8f7] transition-colors text-center">
+          Start Workout
+        </Link>
+        <Link href="/profile" className="bg-[#f0f0f0] text-gray-700 font-bold rounded px-12 py-2 shadow hover:bg-[#e0e0e0] transition-colors text-center">
+          Edit Profile
+        </Link>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { useAuth } from "../../contexts/AuthContext";
 import WorkoutRow from "../workout/WorkoutRow";
 import { useRouter } from "next/navigation";
 
@@ -39,8 +40,28 @@ const motivationalMessages = [
 ];
 
 export default function SummaryPage() {
+  const { user, isLoading } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
+  
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push("/");
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white">
+        <div className="text-[#0082c8] text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
   let rows = [];
   try {
     const data = searchParams.get("data");
