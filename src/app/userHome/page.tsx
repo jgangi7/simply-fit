@@ -93,7 +93,7 @@ export default function UserHome() {
         </button>
       </div>
       <h1 className="text-2xl sm:text-3xl font-bold text-[#0082c8] mt-8 mb-8 text-center">
-        Welcome {user.name || user.email}
+        Welcome {user.username || user.name || user.email}
       </h1>
       <div className="flex flex-row justify-center gap-8 mb-4">
         <div className="text-center">

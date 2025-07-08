@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 
 interface User {
   id: string;
+  username: string;
   name: string;
   email: string;
   maxLifts: {
@@ -16,6 +17,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   login: (username: string, password: string) => Promise<boolean>;
+  register: (username: string, password: string, email: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   updateMaxLifts: (maxLifts: { bench: number; squat: number; deadlift: number }) => void;
   updateMaxLift: (liftType: 'bench' | 'squat' | 'deadlift', weight: number) => void;
@@ -53,10 +55,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (username: string, password: string): Promise<boolean> => {
-    // Simple authentication - in production, this would be an API call
+    // Get all users from localStorage
+    const users = JSON.parse(localStorage.getItem('simply-fit-users') || '[]');
+    const user = users.find((u: any) => u.username === username && u.password === password);
+    
+    if (user) {
+      setUser(user);
+      localStorage.setItem('simply-fit-user', JSON.stringify(user));
+      return true;
+    }
+    
+    // Fallback for demo admin account
     if (username === 'admin' && password === 'password') {
       const userData = {
         id: '1',
+        username: 'admin',
         name: 'Admin User',
         email: 'admin@example.com',
         maxLifts: {
@@ -69,7 +82,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('simply-fit-user', JSON.stringify(userData));
       return true;
     }
+    
     return false;
+  };
+
+  const register = async (username: string, password: string, email: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      // Get existing users
+      const users = JSON.parse(localStorage.getItem('simply-fit-users') || '[]');
+      
+      // Check if username already exists
+      if (users.some((u: any) => u.username === username)) {
+        return { success: false, error: 'Username already exists' };
+      }
+      
+      // Check if email already exists
+      if (users.some((u: any) => u.email === email)) {
+        return { success: false, error: 'Email already exists' };
+      }
+      
+      // Create new user
+      const newUser = {
+        id: Date.now().toString(),
+        username,
+        name: username,
+        email,
+        password,
+        maxLifts: {
+          bench: 0,
+          squat: 0,
+          deadlift: 0,
+        },
+      };
+      
+      // Add to users array
+      users.push(newUser);
+      localStorage.setItem('simply-fit-users', JSON.stringify(users));
+      
+      // Auto-login the new user
+      setUser(newUser);
+      localStorage.setItem('simply-fit-user', JSON.stringify(newUser));
+      
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: 'Registration failed' };
+    }
   };
 
   const logout = () => {
@@ -100,7 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateMaxLifts, updateMaxLift, isLoading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, updateMaxLifts, updateMaxLift, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
